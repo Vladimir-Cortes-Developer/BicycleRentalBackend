@@ -52,7 +52,8 @@ export class AuthService {
       passwordHash,
       phone: dto.phone,
       socioeconomicStratum: dto.socioeconomicStratum,
-      role: 'user', // Por defecto todos los registros son usuarios normales
+        regionalId: new Types.ObjectId(dto.regionalId), // ← Aquí está la solución
+    role: 'user', // Por defecto todos los registros son usuarios normales
     });
 
     // Generar token JWT

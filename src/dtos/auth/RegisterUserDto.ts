@@ -59,4 +59,11 @@ export class RegisterUserDto {
   @Min(1, { message: 'Socioeconomic stratum must be between 1 and 6' })
   @Max(6, { message: 'Socioeconomic stratum must be between 1 and 6' })
   socioeconomicStratum?: number;
+
+
+
+    @IsString({ message: 'Regional ID must be a string' })
+    @IsNotEmpty({ message: 'Regional ID is required' })
+    @Matches(/^[0-9a-fA-F]{24}$/, { message: 'Regional ID must be a valid MongoDB ObjectId' })
+    regionalId!: string;
 }
