@@ -1,12 +1,13 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import mongoose, { Schema, model, Document, Types } from 'mongoose';
 
-export interface IBicycle extends Document {
+// Base interface sin Document para evitar conflicto con el método model()
+interface IBicycleBase {
   code: string;
   brand: string;
-  bicycleModel?: string;
+  model?: string;
   color: string;
   status: 'available' | 'rented' | 'maintenance' | 'retired';
-  rentalPricePerHour: number;
+  rentalPricePerHour: mongoose.Types.Decimal128 | number;
   regionalId: Types.ObjectId;
   currentLocation?: {
     type: 'Point';
@@ -17,6 +18,9 @@ export interface IBicycle extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// Interfaz exportada que extiende Document
+export interface IBicycle extends Omit<Document, 'model'>, IBicycleBase {}
 
 const bicycleSchema = new Schema<IBicycle>(
   {
@@ -34,7 +38,7 @@ const bicycleSchema = new Schema<IBicycle>(
       maxlength: [100, 'Brand cannot exceed 100 characters'],
       trim: true,
     },
-    bicycleModel: {
+    model: {
       type: String,
       maxlength: [100, 'Model cannot exceed 100 characters'],
       trim: true,
@@ -54,28 +58,40 @@ const bicycleSchema = new Schema<IBicycle>(
       default: 'available',
     },
     rentalPricePerHour: {
-      type: Number,
+      type: Schema.Types.Decimal128,
       required: [true, 'Rental price per hour is required'],
-      min: [0, 'Rental price must be a positive number'],
+      get: (v: mongoose.Types.Decimal128) => v ? parseFloat(v.toString()) : 0,
     },
+
+
+
     regionalId: {
       type: Schema.Types.ObjectId,
       ref: 'Regional',
       required: [true, 'Regional ID is required'],
     },
     currentLocation: {
-      type: {
-        type: String,
-        enum: ['Point'],
-        default: 'Point',
-      },
-      coordinates: {
-        type: [Number],
-        validate: {
-          validator: (coords: number[]) => coords.length === 2,
-          message: 'Location coordinates must be [longitude, latitude]',
+      type: new Schema(
+        {
+          type: {
+            type: String,
+            enum: ['Point'],
+            required: true,
+          },
+          coordinates: {
+            type: [Number],
+            required: true,
+            validate: {
+              validator: function(v: number[]) {
+                return v.length === 2;
+              },
+              message: 'Coordinates must have exactly 2 elements [longitude, latitude]'
+            }
+          },
         },
-      },
+        { _id: false }
+      ),
+      required: false,
     },
     purchaseDate: {
       type: Date,
@@ -86,6 +102,8 @@ const bicycleSchema = new Schema<IBicycle>(
   },
   {
     timestamps: true,
+    toJSON: { getters: true },
+    toObject: { getters: true },
   }
 );
 

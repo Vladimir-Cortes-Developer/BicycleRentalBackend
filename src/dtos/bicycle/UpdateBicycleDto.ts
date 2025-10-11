@@ -1,17 +1,17 @@
 import {
   IsEnum,
   IsMongoId,
-  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
-  Min,
   ValidateNested,
   IsArray,
   ArrayMinSize,
   ArrayMaxSize,
+  IsNumber,
+  IsDateString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 class LocationDto {
   @IsEnum(['Point'], { message: 'Location type must be "Point"' })
@@ -27,7 +27,7 @@ class LocationDto {
 export class UpdateBicycleDto {
   @IsString({ message: 'Code must be a string' })
   @IsOptional()
-  @MaxLength(20, { message: 'Code must not exceed 20 characters' })
+  @MaxLength(50, { message: 'Code must not exceed 50 characters' })
   code?: string;
 
   @IsString({ message: 'Brand must be a string' })
@@ -35,16 +35,15 @@ export class UpdateBicycleDto {
   @MaxLength(100, { message: 'Brand must not exceed 100 characters' })
   brand?: string;
 
-  @IsString({ message: 'Bicycle model must be a string' })
+  @IsString({ message: 'Model must be a string' })
   @IsOptional()
-  @MaxLength(100, { message: 'Bicycle model must not exceed 100 characters' })
-  bicycleModel?: string;
+  @MaxLength(100, { message: 'Model must not exceed 100 characters' })
+  model?: string;
 
-  @IsEnum(['mountain', 'road', 'hybrid', 'electric'], {
-    message: 'Bicycle type must be one of: mountain, road, hybrid, electric',
-  })
+  @IsString({ message: 'Color must be a string' })
   @IsOptional()
-  bicycleType?: 'mountain' | 'road' | 'hybrid' | 'electric';
+  @MaxLength(50, { message: 'Color must not exceed 50 characters' })
+  color?: string;
 
   @IsEnum(['available', 'rented', 'maintenance', 'retired'], {
     message: 'Status must be one of: available, rented, maintenance, retired',
@@ -52,10 +51,14 @@ export class UpdateBicycleDto {
   @IsOptional()
   status?: 'available' | 'rented' | 'maintenance' | 'retired';
 
-  @IsNumber({}, { message: 'Rental price per hour must be a number' })
+  @Transform(({ value }) => {
+    // Convertir number a string si es necesario
+    if (typeof value === 'number') return value.toString();
+    return value;
+  })
+  @IsString({ message: 'Rental price per hour must be a string or number' })
   @IsOptional()
-  @Min(0, { message: 'Rental price per hour must be a positive number' })
-  rentalPricePerHour?: number;
+  rentalPricePerHour?: string;
 
   @IsMongoId({ message: 'Regional ID must be a valid MongoDB ObjectId' })
   @IsOptional()
@@ -66,8 +69,11 @@ export class UpdateBicycleDto {
   @IsOptional()
   currentLocation?: LocationDto;
 
-  @IsString({ message: 'Description must be a string' })
   @IsOptional()
-  @MaxLength(500, { message: 'Description must not exceed 500 characters' })
-  description?: string;
+  @IsDateString()
+  purchaseDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  lastMaintenanceDate?: string;
 }

@@ -1,5 +1,5 @@
 import { injectable, inject } from 'tsyringe';
-import { Types, FilterQuery } from 'mongoose';
+import mongoose, { Types, FilterQuery } from 'mongoose';
 import { BicycleRepository } from '../repositories/BicycleRepository';
 import { RegionalRepository } from '../repositories/RegionalRepository';
 import { IBicycle } from '../models/Bicycle';
@@ -31,12 +31,21 @@ export class BicycleService {
     }
 
     // Crear bicicleta con código en mayúsculas
-    const bicycle = await this.bicycleRepository.create({
-      ...dto,
+    const bicycleData: any = {
       code: dto.code.toUpperCase(),
+      brand: dto.brand,
+      color: dto.color,
       status: dto.status || 'available',
+      rentalPricePerHour: mongoose.Types.Decimal128.fromString(dto.rentalPricePerHour),
       regionalId: new Types.ObjectId(dto.regionalId),
-    });
+    };
+
+    if (dto.model) bicycleData.model = dto.model;
+    if (dto.currentLocation) bicycleData.currentLocation = dto.currentLocation;
+    if (dto.purchaseDate) bicycleData.purchaseDate = new Date(dto.purchaseDate);
+    if (dto.lastMaintenanceDate) bicycleData.lastMaintenanceDate = new Date(dto.lastMaintenanceDate);
+
+    const bicycle = await this.bicycleRepository.create(bicycleData);
 
     return bicycle;
   }
@@ -165,16 +174,23 @@ export class BicycleService {
       }
     }
 
-    // Actualizar bicicleta
-    const { regionalId: _regionalId, ...dtoWithoutRegional } = dto;
-    const updateData: Partial<IBicycle> = {
-      ...dtoWithoutRegional,
-      code: dto.code ? dto.code.toUpperCase() : undefined,
-    };
+    // Preparar datos de actualización
+    const updateData: any = {};
 
+    if (dto.code) updateData.code = dto.code.toUpperCase();
+    if (dto.brand) updateData.brand = dto.brand;
+    if (dto.model) updateData.model = dto.model;
+    if (dto.color) updateData.color = dto.color;
+    if (dto.status) updateData.status = dto.status;
+    if (dto.rentalPricePerHour) {
+      updateData.rentalPricePerHour = mongoose.Types.Decimal128.fromString(dto.rentalPricePerHour);
+    }
     if (dto.regionalId) {
       updateData.regionalId = new Types.ObjectId(dto.regionalId);
     }
+    if (dto.currentLocation) updateData.currentLocation = dto.currentLocation;
+    if (dto.purchaseDate) updateData.purchaseDate = new Date(dto.purchaseDate);
+    if (dto.lastMaintenanceDate) updateData.lastMaintenanceDate = new Date(dto.lastMaintenanceDate);
 
     const updatedBicycle = await this.bicycleRepository.update(id, updateData);
 

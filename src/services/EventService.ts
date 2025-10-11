@@ -21,26 +21,46 @@ export class EventService {
   /**
    * Crea un nuevo evento (ciclopaseo)
    * @param dto - Datos del evento
+   * @param userId - ID del usuario que crea el evento
    * @returns Evento creado
    */
-  async create(dto: CreateEventDto): Promise<IEvent> {
+  async create(dto: CreateEventDto, userId: string): Promise<IEvent> {
     // Verificar que la regional exista
     const regional = await this.regionalRepository.findById(dto.regionalId);
     if (!regional) {
       throw new Error('Regional not found');
     }
 
+    // Convertir eventDate de string a Date
+    const eventDate = new Date(dto.eventDate);
+
     // Validar que la fecha del evento sea futura
-    if (dto.eventDate <= new Date()) {
+    if (eventDate <= new Date()) {
       throw new Error('Event date must be in the future');
     }
 
-    // Crear evento
-    const event = await this.eventRepository.create({
-      ...dto,
+    // Preparar datos del evento
+    const eventData: any = {
+      name: dto.name,
+      eventDate: eventDate,
+      startTime: dto.startTime,
       regionalId: new Types.ObjectId(dto.regionalId),
+      createdBy: new Types.ObjectId(userId),
       currentParticipants: 0,
-    });
+    };
+
+    // Agregar campos opcionales si existen
+    if (dto.description) eventData.description = dto.description;
+    if (dto.eventType) eventData.eventType = dto.eventType;
+    if (dto.endTime) eventData.endTime = dto.endTime;
+    if (dto.routeDescription) eventData.routeDescription = dto.routeDescription;
+    if (dto.meetingPoint) eventData.meetingPoint = dto.meetingPoint;
+    if (dto.meetingPointLocation) eventData.meetingPointLocation = dto.meetingPointLocation;
+    if (dto.maxParticipants) eventData.maxParticipants = dto.maxParticipants;
+    if (dto.status) eventData.status = dto.status;
+
+    // Crear evento
+    const event = await this.eventRepository.create(eventData);
 
     return event;
   }
@@ -133,8 +153,11 @@ export class EventService {
     }
 
     // Si se actualiza la fecha, validar que sea futura
-    if (dto.eventDate && dto.eventDate <= new Date()) {
-      throw new Error('Event date must be in the future');
+    if (dto.eventDate) {
+      const eventDate = new Date(dto.eventDate);
+      if (eventDate <= new Date()) {
+        throw new Error('Event date must be in the future');
+      }
     }
 
     // Si se actualiza maxParticipants, validar que sea mayor o igual a currentParticipants
@@ -142,10 +165,21 @@ export class EventService {
       throw new Error('Max participants cannot be less than current participants');
     }
 
-    const updateData: any = { ...dto };
-    if (dto.regionalId) {
-      updateData.regionalId = new Types.ObjectId(dto.regionalId);
-    }
+    // Preparar datos de actualización
+    const updateData: any = {};
+
+    if (dto.name) updateData.name = dto.name;
+    if (dto.description !== undefined) updateData.description = dto.description;
+    if (dto.eventType) updateData.eventType = dto.eventType;
+    if (dto.eventDate) updateData.eventDate = new Date(dto.eventDate);
+    if (dto.startTime) updateData.startTime = dto.startTime;
+    if (dto.endTime !== undefined) updateData.endTime = dto.endTime;
+    if (dto.routeDescription !== undefined) updateData.routeDescription = dto.routeDescription;
+    if (dto.meetingPoint !== undefined) updateData.meetingPoint = dto.meetingPoint;
+    if (dto.meetingPointLocation) updateData.meetingPointLocation = dto.meetingPointLocation;
+    if (dto.maxParticipants) updateData.maxParticipants = dto.maxParticipants;
+    if (dto.regionalId) updateData.regionalId = new Types.ObjectId(dto.regionalId);
+    if (dto.status) updateData.status = dto.status;
 
     const updatedEvent = await this.eventRepository.update(id, updateData);
     if (!updatedEvent) {

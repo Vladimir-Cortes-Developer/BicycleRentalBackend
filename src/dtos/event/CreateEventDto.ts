@@ -1,5 +1,4 @@
 import {
-  IsDate,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
@@ -12,6 +11,8 @@ import {
   IsArray,
   ArrayMinSize,
   ArrayMaxSize,
+  Matches,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -31,32 +32,49 @@ export class CreateEventDto {
   @IsString({ message: 'Event name must be a string' })
   @IsNotEmpty({ message: 'Event name is required' })
   @MaxLength(200, { message: 'Event name must not exceed 200 characters' })
-  eventName!: string;
+  name!: string;
 
   @IsString({ message: 'Description must be a string' })
-  @IsNotEmpty({ message: 'Description is required' })
+  @IsOptional()
   @MaxLength(1000, { message: 'Description must not exceed 1000 characters' })
-  description!: string;
+  description?: string;
 
-  @Type(() => Date)
-  @IsDate({ message: 'Event date must be a valid date' })
+  @IsString({ message: 'Event type must be a string' })
+  @IsOptional()
+  @MaxLength(50, { message: 'Event type must not exceed 50 characters' })
+  eventType?: string;
+
   @IsNotEmpty({ message: 'Event date is required' })
-  eventDate!: Date;
+  @IsDateString({}, { message: 'Event date must be a valid date string' })
+  eventDate!: string;
 
-  @ValidateNested()
-  @Type(() => LocationDto)
-  @IsNotEmpty({ message: 'Start location is required' })
-  startLocation!: LocationDto;
+  @IsString({ message: 'Start time must be a string' })
+  @IsNotEmpty({ message: 'Start time is required' })
+  @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+    message: 'Start time must be in HH:MM format',
+  })
+  startTime!: string;
+
+  @IsString({ message: 'End time must be a string' })
+  @IsOptional()
+  @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+    message: 'End time must be in HH:MM format',
+  })
+  endTime?: string;
+
+  @IsString({ message: 'Route description must be a string' })
+  @IsOptional()
+  routeDescription?: string;
+
+  @IsString({ message: 'Meeting point must be a string' })
+  @IsOptional()
+  @MaxLength(255, { message: 'Meeting point must not exceed 255 characters' })
+  meetingPoint?: string;
 
   @ValidateNested()
   @Type(() => LocationDto)
   @IsOptional()
-  endLocation?: LocationDto;
-
-  @IsNumber({}, { message: 'Distance must be a number' })
-  @IsOptional()
-  @Min(0, { message: 'Distance must be a positive number' })
-  distance?: number;
+  meetingPointLocation?: LocationDto;
 
   @IsNumber({}, { message: 'Max participants must be a number' })
   @IsOptional()
@@ -66,4 +84,10 @@ export class CreateEventDto {
   @IsMongoId({ message: 'Regional ID must be a valid MongoDB ObjectId' })
   @IsNotEmpty({ message: 'Regional ID is required' })
   regionalId!: string;
+
+  @IsEnum(['draft', 'published', 'cancelled', 'completed'], {
+    message: 'Status must be one of: draft, published, cancelled, completed',
+  })
+  @IsOptional()
+  status?: 'draft' | 'published' | 'cancelled' | 'completed';
 }

@@ -16,7 +16,11 @@ export class EventController {
    */
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const event = await this.eventService.create(req.body);
+      if (!req.user) {
+        throw new AppError('User not authenticated', 401);
+      }
+
+      const event = await this.eventService.create(req.body, req.user.userId);
 
       res.status(201).json({
         success: true,

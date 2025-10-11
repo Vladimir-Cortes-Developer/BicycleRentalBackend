@@ -23,8 +23,12 @@ export class BicycleController {
         message: 'Bicycle created successfully',
         data: bicycle,
       });
-    } catch (error) {
-      if (error instanceof Error) {
+    } catch (error: any) {
+      // Handle MongoDB validation errors
+      if (error.name === 'ValidationError') {
+        const validationErrors = Object.values(error.errors || {}).map((err: any) => err.message);
+        next(new AppError(`Validation failed: ${validationErrors.join(', ')}`, 400));
+      } else if (error instanceof Error) {
         next(new AppError(error.message, 400));
       } else {
         next(error);

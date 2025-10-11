@@ -69,6 +69,11 @@ export class RentalService {
         user.socioeconomicStratum
       );
 
+      // Convertir rentalPricePerHour a number si es Decimal128
+      const baseRate = typeof bicycle.rentalPricePerHour === 'number'
+        ? bicycle.rentalPricePerHour
+        : parseFloat(bicycle.rentalPricePerHour.toString());
+
       // Crear alquiler
       const rental = await this.rentalRepository.create(
         {
@@ -76,7 +81,7 @@ export class RentalService {
           bicycleId: new Types.ObjectId(dto.bicycleId),
           startTime: new Date(),
           status: 'active',
-          baseRate: bicycle.rentalPricePerHour,
+          baseRate,
           discountPercentage,
           startLocation: dto.startLocation || bicycle.currentLocation,
         },
