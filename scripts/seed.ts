@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { connectDB } from '../src/config/database';
-import { Regional, User, Bicycle } from '../src/models';
+import { Regional, User, Bicycle, Event } from '../src/models';
 import { BcryptUtils } from '../src/utils/bcrypt';
 
 const regionals = [
@@ -58,6 +58,7 @@ const regionals = [
 
 const bicycleColors = ['Rojo', 'Azul', 'Negro', 'Blanco', 'Verde', 'Amarillo'];
 const bicycleBrands = ['GW', 'Trek', 'Specialized', 'Giant', 'Cannondale', 'Scott'];
+const bicycleTypes = ['mountain', 'road', 'hybrid', 'electric'] as const;
 
 async function seed() {
   try {
@@ -70,6 +71,7 @@ async function seed() {
     await Regional.deleteMany({});
     await User.deleteMany({});
     await Bicycle.deleteMany({});
+    await Event.deleteMany({});
     console.log('✅ Existing data cleared\n');
 
     // Create regionals
@@ -131,12 +133,16 @@ async function seed() {
       const brand = bicycleBrands[i % bicycleBrands.length];
       const color = bicycleColors[i % bicycleColors.length];
 
+      const bicycleType = bicycleTypes[i % bicycleTypes.length];
+      const statuses = ['available', 'available', 'available', 'maintenance'] as const; // 75% disponibles
+
       bicycles.push({
         code: `BIC-${String(i).padStart(3, '0')}`,
         brand,
-        bicycleModel: `Model ${i}`,
+        bicycleModel: `${brand} ${bicycleType.toUpperCase()} ${i}`,
+        bicycleType,
         color,
-        status: 'available',
+        status: statuses[i % statuses.length],
         rentalPricePerHour: 5000 + Math.floor(Math.random() * 3000), // Entre 5000 y 8000
         regionalId: regional._id,
         currentLocation: regional.location
@@ -151,6 +157,7 @@ async function seed() {
         purchaseDate: new Date(
           Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)
         ),
+        description: `Bicicleta ${bicycleType} ${brand} ${color} en excelente estado`,
       });
     }
 
