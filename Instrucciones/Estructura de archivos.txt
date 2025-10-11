@@ -1,0 +1,17 @@
+
+src/
+├── models/                # Mongoose models
+├── dtos/                  # Validación con class-validator
+├── repositories/          # Acceso a datos
+├── services/              # Lógica de negocio
+├── controllers/           # Controladores Express
+├── routes/                # Endpoints
+├── events/                # Sistema de eventos (POE)
+│   ├── dispatchers/       # Emisión de eventos
+│   ├── listeners/         # Reacción a eventos
+│   ├── types/             # Tipos de eventos
+├── transactions/          # Operaciones atómicas
+├── di/                    # Contenedor de dependencias. Reducir el acoplamiento y aumentar la cohesion. Orientado a testing Unitario y de integración.
+├── config/                # Conexión DB, env
+├── app.ts                 # Configuración Express
+└── server.ts              # Punto de entrada

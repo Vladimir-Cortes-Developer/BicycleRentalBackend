@@ -1,0 +1,606 @@
+// ============================================
+// COLECCIÓN: regionals
+// ============================================
+db.createCollection("regionals", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "city", "department"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "ID único de la regional"
+        },
+        name: {
+          bsonType: "string",
+          maxLength: 150,
+          description: "Nombre de la regional"
+        },
+        city: {
+          bsonType: "string",
+          maxLength: 100,
+          description: "Ciudad"
+        },
+        department: {
+          bsonType: "string",
+          maxLength: 100,
+          description: "Departamento"
+        },
+        address: {
+          bsonType: ["string", "null"],
+          maxLength: 255,
+          description: "Dirección"
+        },
+        location: {
+          bsonType: ["object", "null"],
+          required: ["type", "coordinates"],
+          properties: {
+            type: {
+              enum: ["Point"],
+              description: "Tipo de geometría GeoJSON"
+            },
+            coordinates: {
+              bsonType: "array",
+              minItems: 2,
+              maxItems: 2,
+              items: {
+                bsonType: "double"
+              },
+              description: "Coordenadas [longitude, latitude]"
+            }
+          },
+          description: "Ubicación geoespacial (GeoJSON)"
+        },
+        createdAt: {
+          bsonType: "date",
+          description: "Fecha de creación"
+        }
+      }
+    }
+  }
+});
+
+// ============================================
+// COLECCIÓN: users
+// ============================================
+db.createCollection("users", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["documentType", "documentNumber", "firstName", "lastName", "email", "passwordHash", "regionalId"],
+      properties: {
+        _id: {
+          bsonType: "objectId"
+        },
+        documentType: {
+          enum: ["CC", "TI", "CE"],
+          description: "Tipo de documento"
+        },
+        documentNumber: {
+          bsonType: "string",
+          maxLength: 20,
+          description: "Número de documento (único)"
+        },
+        firstName: {
+          bsonType: "string",
+          maxLength: 100,
+          description: "Primer nombre"
+        },
+        lastName: {
+          bsonType: "string",
+          maxLength: 100,
+          description: "Apellido"
+        },
+        email: {
+          bsonType: "string",
+          maxLength: 150,
+          pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+          description: "Email (único)"
+        },
+        passwordHash: {
+          bsonType: "string",
+          maxLength: 255,
+          description: "Hash de contraseña"
+        },
+        phone: {
+          bsonType: ["string", "null"],
+          maxLength: 20,
+          description: "Teléfono"
+        },
+        socioeconomicStratum: {
+          bsonType: ["int", "null"],
+          minimum: 1,
+          maximum: 6,
+          description: "Estrato socioeconómico"
+        },
+        role: {
+          enum: ["user", "admin"],
+          description: "Rol del usuario"
+        },
+        regionalId: {
+          bsonType: "objectId",
+          description: "Referencia a regionals"
+        },
+        isActive: {
+          bsonType: "bool",
+          description: "Usuario activo"
+        },
+        createdAt: {
+          bsonType: "date"
+        },
+        updatedAt: {
+          bsonType: "date"
+        }
+      }
+    }
+  }
+});
+
+// ============================================
+// COLECCIÓN: bicycles
+// ============================================
+db.createCollection("bicycles", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["code", "brand", "color", "rentalPricePerHour", "regionalId"],
+      properties: {
+        _id: {
+          bsonType: "objectId"
+        },
+        code: {
+          bsonType: "string",
+          maxLength: 50,
+          description: "Código único de identificación física"
+        },
+        brand: {
+          bsonType: "string",
+          maxLength: 100,
+          description: "Marca"
+        },
+        model: {
+          bsonType: ["string", "null"],
+          maxLength: 100,
+          description: "Modelo"
+        },
+        color: {
+          bsonType: "string",
+          maxLength: 50,
+          description: "Color"
+        },
+        status: {
+          enum: ["available", "rented", "maintenance", "retired"],
+          description: "Estado de la bicicleta"
+        },
+        rentalPricePerHour: {
+          bsonType: "decimal",
+          description: "Precio de alquiler por hora"
+        },
+        regionalId: {
+          bsonType: "objectId",
+          description: "Referencia a regionals"
+        },
+        currentLocation: {
+          bsonType: ["object", "null"],
+          required: ["type", "coordinates"],
+          properties: {
+            type: {
+              enum: ["Point"]
+            },
+            coordinates: {
+              bsonType: "array",
+              minItems: 2,
+              maxItems: 2,
+              items: {
+                bsonType: "double"
+              },
+              description: "Coordenadas [longitude, latitude]"
+            }
+          },
+          description: "Ubicación actual (GeoJSON)"
+        },
+        purchaseDate: {
+          bsonType: ["date", "null"],
+          description: "Fecha de compra"
+        },
+        lastMaintenanceDate: {
+          bsonType: ["date", "null"],
+          description: "Última fecha de mantenimiento"
+        },
+        createdAt: {
+          bsonType: "date"
+        },
+        updatedAt: {
+          bsonType: "date"
+        }
+      }
+    }
+  }
+});
+
+// ============================================
+// COLECCIÓN: rentals
+// ============================================
+db.createCollection("rentals", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["userId", "bicycleId", "startTime", "baseRate"],
+      properties: {
+        _id: {
+          bsonType: "objectId"
+        },
+        userId: {
+          bsonType: "objectId",
+          description: "Referencia a users"
+        },
+        bicycleId: {
+          bsonType: "objectId",
+          description: "Referencia a bicycles"
+        },
+        startTime: {
+          bsonType: "date",
+          description: "Hora de inicio"
+        },
+        endTime: {
+          bsonType: ["date", "null"],
+          description: "Hora de fin"
+        },
+        estimatedReturnTime: {
+          bsonType: ["date", "null"],
+          description: "Hora estimada de retorno"
+        },
+        startLocation: {
+          bsonType: ["object", "null"],
+          properties: {
+            type: {
+              enum: ["Point"]
+            },
+            coordinates: {
+              bsonType: "array",
+              minItems: 2,
+              maxItems: 2
+            }
+          }
+        },
+        endLocation: {
+          bsonType: ["object", "null"],
+          properties: {
+            type: {
+              enum: ["Point"]
+            },
+            coordinates: {
+              bsonType: "array",
+              minItems: 2,
+              maxItems: 2
+            }
+          }
+        },
+        baseRate: {
+          bsonType: "decimal",
+          description: "Tarifa base"
+        },
+        hoursUsed: {
+          bsonType: ["decimal", "null"],
+          description: "Horas usadas"
+        },
+        subtotal: {
+          bsonType: ["decimal", "null"],
+          description: "Subtotal"
+        },
+        discountPercentage: {
+          bsonType: "decimal",
+          description: "Porcentaje de descuento"
+        },
+        discountAmount: {
+          bsonType: "decimal",
+          description: "Monto de descuento"
+        },
+        totalAmount: {
+          bsonType: ["decimal", "null"],
+          description: "Monto total"
+        },
+        paymentStatus: {
+          enum: ["pending", "paid", "cancelled"],
+          description: "Estado del pago"
+        },
+        status: {
+          enum: ["active", "completed", "cancelled"],
+          description: "Estado del alquiler"
+        },
+        createdAt: {
+          bsonType: "date"
+        },
+        updatedAt: {
+          bsonType: "date"
+        }
+      }
+    }
+  }
+});
+
+// ============================================
+// COLECCIÓN: events
+// ============================================
+db.createCollection("events", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "eventDate", "startTime", "regionalId", "createdBy"],
+      properties: {
+        _id: {
+          bsonType: "objectId"
+        },
+        name: {
+          bsonType: "string",
+          maxLength: 200,
+          description: "Nombre del evento"
+        },
+        description: {
+          bsonType: ["string", "null"],
+          description: "Descripción"
+        },
+        eventType: {
+          bsonType: "string",
+          maxLength: 50,
+          description: "Tipo de evento"
+        },
+        eventDate: {
+          bsonType: "date",
+          description: "Fecha del evento"
+        },
+        startTime: {
+          bsonType: "string",
+          description: "Hora de inicio (formato HH:MM)"
+        },
+        endTime: {
+          bsonType: ["string", "null"],
+          description: "Hora de fin (formato HH:MM)"
+        },
+        routeDescription: {
+          bsonType: ["string", "null"],
+          description: "Descripción de la ruta"
+        },
+        meetingPoint: {
+          bsonType: ["string", "null"],
+          maxLength: 255,
+          description: "Punto de encuentro"
+        },
+        meetingPointLocation: {
+          bsonType: ["object", "null"],
+          properties: {
+            type: {
+              enum: ["Point"]
+            },
+            coordinates: {
+              bsonType: "array",
+              minItems: 2,
+              maxItems: 2
+            }
+          }
+        },
+        maxParticipants: {
+          bsonType: ["int", "null"],
+          description: "Máximo de participantes"
+        },
+        currentParticipants: {
+          bsonType: "int",
+          description: "Participantes actuales"
+        },
+        regionalId: {
+          bsonType: "objectId",
+          description: "Referencia a regionals"
+        },
+        createdBy: {
+          bsonType: "objectId",
+          description: "Referencia a users"
+        },
+        status: {
+          enum: ["draft", "published", "cancelled", "completed"],
+          description: "Estado del evento"
+        },
+        createdAt: {
+          bsonType: "date"
+        },
+        updatedAt: {
+          bsonType: "date"
+        }
+      }
+    }
+  }
+});
+
+// ============================================
+// COLECCIÓN: event_participants
+// ============================================
+db.createCollection("event_participants", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["eventId", "userId"],
+      properties: {
+        _id: {
+          bsonType: "objectId"
+        },
+        eventId: {
+          bsonType: "objectId",
+          description: "Referencia a events"
+        },
+        userId: {
+          bsonType: "objectId",
+          description: "Referencia a users"
+        },
+        registrationDate: {
+          bsonType: "date",
+          description: "Fecha de registro"
+        },
+        attendanceStatus: {
+          enum: ["registered", "attended", "absent", "cancelled"],
+          description: "Estado de asistencia"
+        }
+      }
+    }
+  }
+});
+
+// ============================================
+// COLECCIÓN: payments
+// ============================================
+db.createCollection("payments", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["rentalId", "amount"],
+      properties: {
+        _id: {
+          bsonType: "objectId"
+        },
+        rentalId: {
+          bsonType: "objectId",
+          description: "Referencia a rentals"
+        },
+        amount: {
+          bsonType: "decimal",
+          description: "Monto del pago"
+        },
+        paymentMethod: {
+          bsonType: ["string", "null"],
+          maxLength: 50,
+          description: "Método de pago: efectivo, tarjeta, transferencia"
+        },
+        paymentDate: {
+          bsonType: "date",
+          description: "Fecha del pago"
+        },
+        transactionId: {
+          bsonType: ["string", "null"],
+          maxLength: 100,
+          description: "ID de transacción"
+        },
+        status: {
+          enum: ["pending", "completed", "failed", "refunded"],
+          description: "Estado del pago"
+        }
+      }
+    }
+  }
+});
+
+// ============================================
+// COLECCIÓN: maintenance_logs
+// ============================================
+db.createCollection("maintenance_logs", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["bicycleId", "maintenanceType", "maintenanceDate"],
+      properties: {
+        _id: {
+          bsonType: "objectId"
+        },
+        bicycleId: {
+          bsonType: "objectId",
+          description: "Referencia a bicycles"
+        },
+        maintenanceType: {
+          bsonType: "string",
+          maxLength: 100,
+          description: "Tipo: preventivo, correctivo"
+        },
+        description: {
+          bsonType: ["string", "null"],
+          description: "Descripción del mantenimiento"
+        },
+        cost: {
+          bsonType: ["decimal", "null"],
+          description: "Costo del mantenimiento"
+        },
+        performedBy: {
+          bsonType: ["string", "null"],
+          maxLength: 150,
+          description: "Realizado por"
+        },
+        maintenanceDate: {
+          bsonType: "date",
+          description: "Fecha de mantenimiento"
+        },
+        nextMaintenanceDate: {
+          bsonType: ["date", "null"],
+          description: "Próxima fecha de mantenimiento"
+        },
+        createdAt: {
+          bsonType: "date"
+        }
+      }
+    }
+  }
+});
+
+// ============================================
+// ÍNDICES
+// ============================================
+
+// Índices para users
+db.users.createIndex({ email: 1 }, { unique: true });
+db.users.createIndex({ documentNumber: 1 }, { unique: true });
+db.users.createIndex({ regionalId: 1 });
+
+// Índices para bicycles
+db.bicycles.createIndex({ code: 1 }, { unique: true });
+db.bicycles.createIndex({ status: 1 });
+db.bicycles.createIndex({ regionalId: 1 });
+db.bicycles.createIndex({ currentLocation: "2dsphere" }); // Índice geoespacial
+
+// Índices para rentals
+db.rentals.createIndex({ userId: 1 });
+db.rentals.createIndex({ bicycleId: 1 });
+db.rentals.createIndex({ status: 1 });
+db.rentals.createIndex({ startTime: 1, endTime: 1 });
+db.rentals.createIndex({ paymentStatus: 1 });
+
+// Índices para events
+db.events.createIndex({ eventDate: 1 });
+db.events.createIndex({ status: 1 });
+db.events.createIndex({ regionalId: 1 });
+db.events.createIndex({ createdBy: 1 });
+
+// Índices para event_participants
+db.event_participants.createIndex({ eventId: 1, userId: 1 }, { unique: true });
+db.event_participants.createIndex({ userId: 1 });
+
+// Índices para payments
+db.payments.createIndex({ rentalId: 1 });
+db.payments.createIndex({ status: 1 });
+db.payments.createIndex({ paymentDate: 1 });
+
+// Índices para maintenance_logs
+db.maintenance_logs.createIndex({ bicycleId: 1 });
+db.maintenance_logs.createIndex({ maintenanceDate: 1 });
+
+// Índices geoespaciales
+db.regionals.createIndex({ location: "2dsphere" });
+db.rentals.createIndex({ startLocation: "2dsphere" });
+db.rentals.createIndex({ endLocation: "2dsphere" });
+db.events.createIndex({ meetingPointLocation: "2dsphere" });
+
+// ============================================
+// VALORES POR DEFECTO (mediante aplicación)
+// ============================================
+/*
+MongoDB no soporta valores por defecto en el esquema como SQL.
+Estos deben manejarse en la capa de aplicación:
+
+- role: 'user'
+- isActive: true
+- status (bicycles): 'available'
+- paymentStatus (rentals): 'pending'
+- status (rentals): 'active'
+- discountPercentage: 0
+- discountAmount: 0
+- currentParticipants (events): 0
+- eventType: 'ciclopaseo'
+- status (events): 'published'
+- attendanceStatus: 'registered'
+- status (payments): 'completed'
+- createdAt, updatedAt: new Date()
+*/

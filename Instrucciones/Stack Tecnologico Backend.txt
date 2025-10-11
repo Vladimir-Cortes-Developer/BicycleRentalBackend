@@ -1,0 +1,25 @@
+STACK TECNOLÓGICO BACKEND
+
+Backend
+
+Node.js + Express.js 
+TypeScript 
+JWT para autenticación Y Autorización por roles
+Bcrypt para encriptación
+.env para variables de entorno, secretos y configuraciones de entornos
+Inyector e dependencias compatible con TS y Nodey Express
+
+Base de Datos
+
+ODM Mongoose
+
+DevOps
+
+Git + GitHub
+Docker
+GitHub Actions / GitLab CI
+
+Adicionales
+
+SendGrid  (emails)
+Azure Blob (archivos)
