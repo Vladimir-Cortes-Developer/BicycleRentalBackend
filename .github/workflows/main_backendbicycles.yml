@@ -24,7 +24,6 @@ jobs:
         run: |
           npm install
           npm run build --if-present
-
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -37,6 +36,15 @@ jobs:
     permissions:
       id-token: write
       contents: read
+
+    # 👇 Aquí defines las variables de entorno
+    env:
+      DB_NAME: ${{ secrets.DB_NAME }}
+      JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      NODE_ENV: ${{ vars.NODE_ENV }}
+      PORT: ${{ vars.PORT }}
 
     steps:
       - name: Download artifact from build job
@@ -57,3 +65,4 @@ jobs:
           app-name: 'backendbicycles'
           slot-name: 'Production'
           package: .
+``
