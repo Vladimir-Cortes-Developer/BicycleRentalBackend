@@ -21,6 +21,7 @@ const startServer = async (): Promise<void> => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📝 Environment: ${config.nodeEnv}`);
       console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
+      console.log(`📚 Swagger Docs: http://localhost:${PORT}/api-docs`);
       console.log(`📦 Database: ${config.mongodb.dbName}`);
       console.log('=================================');
     });

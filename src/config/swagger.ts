@@ -20,12 +20,10 @@ const swaggerOptions: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: `http://localhost:${config.port}/api`,
-        description: 'Development server',
-      },
-      {
-        url: 'https://api.bicyclerental.com/api',
-        description: 'Production server',
+        url: config.nodeEnv === 'production'
+          ? `${process.env.API_BASE_URL || 'https://your-app.azurewebsites.net'}/api`
+          : `http://localhost:${config.port}/api`,
+        description: config.nodeEnv === 'production' ? 'Production server (Azure)' : 'Development server',
       },
     ],
     components: {
