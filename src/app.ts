@@ -3,9 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
+import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
 import { errorHandler } from './middlewares';
 import { initializeEventListeners } from './events';
+import { swaggerSpec } from './config/swagger';
 
 // Inicializar DI container
 import './di/container';
@@ -13,7 +15,18 @@ import './di/container';
 const app: Application = express();
 
 // Security middlewares
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+  })
+);
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || '*',
@@ -38,6 +51,22 @@ if (process.env.NODE_ENV !== 'production') {
 // Initialize event listeners
 initializeEventListeners();
 
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Bicycle Rental API Documentation',
+  customfavIcon: '/favicon.ico',
+  swaggerOptions: {
+    persistAuthorization: true,
+  },
+}));
+
+// Swagger JSON endpoint
+app.get('/api-docs.json', (_req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
 // API Routes
 app.use('/api', routes);
 
@@ -56,7 +85,7 @@ app.get('/', (_req: Request, res: Response) => {
       maintenance: '/api/maintenance',
       reports: '/api/reports',
     },
-    documentation: 'Coming soon...',
+    documentation: '/api-docs',
   });
 });
 
