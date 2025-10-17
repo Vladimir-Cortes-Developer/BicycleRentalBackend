@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 
-// Cargar variables de entorno
-dotenv.config();
+// Cargar variables de entorno solo en desarrollo
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 interface Config {
   port: number;
