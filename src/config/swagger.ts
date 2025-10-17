@@ -449,8 +449,8 @@ const swaggerOptions: swaggerJsdoc.Options = {
     ],
   },
   apis: config.nodeEnv === 'production'
-    ? ['./dist/routes/*.js', './dist/controllers/*.js']
-    : ['./src/routes/*.ts', './src/controllers/*.ts'],
+    ? ['dist/routes/*.js', 'dist/controllers/*.js']
+    : ['src/routes/*.ts', 'src/controllers/*.ts'],
 };
 
 export const swaggerSpec = swaggerJsdoc(swaggerOptions);
