@@ -44,6 +44,7 @@ jobs:
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
       NODE_ENV: ${{ vars.NODE_ENV }}
       PORT: ${{ vars.PORT }}
+      API_BASE_URL: ${{vars.API_BASE_URL}}
 
     steps:
       - name: Download artifact from build job
@@ -64,3 +65,4 @@ jobs:
           app-name: 'backendbicycles'
           slot-name: 'Production'
           package: .
+
