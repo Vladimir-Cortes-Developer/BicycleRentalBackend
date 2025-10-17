@@ -50,6 +50,7 @@ export const config: Config = {
 // Validar configuración crítica
 export const validateConfig = (): void => {
   const errors: string[] = [];
+  const warnings: string[] = [];
 
   if (!config.mongodb.uri) {
     errors.push('MONGODB_URI is required');
@@ -59,8 +60,14 @@ export const validateConfig = (): void => {
     errors.push('JWT_SECRET must be set to a secure value in production');
   }
 
+  // SendGrid es opcional - solo advertencia
   if (config.nodeEnv === 'production' && !config.sendgrid.apiKey) {
-    errors.push('SENDGRID_API_KEY is required in production');
+    warnings.push('SENDGRID_API_KEY is not configured - email functionality will be disabled');
+  }
+
+  if (warnings.length > 0) {
+    console.warn('⚠️  Configuration warnings:');
+    warnings.forEach((warning) => console.warn(`   - ${warning}`));
   }
 
   if (errors.length > 0) {
