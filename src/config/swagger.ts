@@ -1,5 +1,6 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import { config } from './index';
+import path from 'path';
 
 const swaggerOptions: swaggerJsdoc.Options = {
   definition: {
@@ -449,8 +450,14 @@ const swaggerOptions: swaggerJsdoc.Options = {
     ],
   },
   apis: config.nodeEnv === 'production'
-    ? ['dist/routes/*.js', 'dist/controllers/*.js']
-    : ['src/routes/*.ts', 'src/controllers/*.ts'],
+    ? [
+        path.join(__dirname, '../routes/*.js'),
+        path.join(__dirname, '../controllers/*.js')
+      ]
+    : [
+        path.join(__dirname, '../routes/*.ts'),
+        path.join(__dirname, '../controllers/*.ts')
+      ],
 };
 
 export const swaggerSpec = swaggerJsdoc(swaggerOptions);
