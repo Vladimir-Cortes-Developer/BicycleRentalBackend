@@ -37,7 +37,6 @@ jobs:
       id-token: write
       contents: read
 
-    # 👇 Aquí defines las variables de entorno
     env:
       DB_NAME: ${{ secrets.DB_NAME }}
       JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
@@ -65,4 +64,3 @@ jobs:
           app-name: 'backendbicycles'
           slot-name: 'Production'
           package: .
-``
