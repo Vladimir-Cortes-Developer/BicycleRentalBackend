@@ -95,9 +95,7 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-// Índices
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ documentNumber: 1 }, { unique: true });
+// Índices adicionales (email y documentNumber ya tienen unique: true en el schema)
 userSchema.index({ regionalId: 1 });
 userSchema.index({ role: 1 });
 

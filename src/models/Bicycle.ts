@@ -107,8 +107,7 @@ const bicycleSchema = new Schema<IBicycle>(
   }
 );
 
-// Índices
-bicycleSchema.index({ code: 1 }, { unique: true });
+// Índices adicionales (code ya tiene unique: true en el schema)
 bicycleSchema.index({ status: 1 });
 bicycleSchema.index({ regionalId: 1 });
 bicycleSchema.index({ currentLocation: '2dsphere' });
