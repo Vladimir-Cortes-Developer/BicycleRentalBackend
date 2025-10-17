@@ -21,7 +21,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
     servers: [
       {
         url: config.nodeEnv === 'production'
-          ? `${process.env.API_BASE_URL || 'https://your-app.azurewebsites.net'}/api`
+          ? `${process.env.API_BASE_URL || 'https://backendbicycles-dyf5bfh6hkhmagbq.eastus-01.azurewebsites.net'}/api`
           : `http://localhost:${config.port}/api`,
         description: config.nodeEnv === 'production' ? 'Production server (Azure)' : 'Development server',
       },
