@@ -385,15 +385,16 @@ export class EventService {
   /**
    * Obtiene todos los eventos en los que está registrado un usuario
    * @param userId - ID del usuario
+   * @param eventStatus - Estado del evento para filtrar (opcional)
    * @returns Lista de eventos
    */
-  async getUserEvents(userId: string): Promise<IEventParticipant[]> {
+  async getUserEvents(userId: string, eventStatus?: string): Promise<IEventParticipant[]> {
     // Verificar que el usuario exista
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new Error('User not found');
     }
 
-    return this.eventParticipantRepository.findByUser(userId);
+    return this.eventParticipantRepository.findByUser(userId, eventStatus);
   }
 }

@@ -253,6 +253,7 @@ export class EventController {
   /**
    * GET /api/events/my
    * Obtiene eventos del usuario autenticado
+   * Query params: status (draft, published, cancelled, completed)
    */
   getMyEvents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -260,7 +261,10 @@ export class EventController {
         throw new AppError('User not authenticated', 401);
       }
 
-      const events = await this.eventService.getUserEvents(req.user.userId);
+      const { status } = req.query;
+      const eventStatus = status as string | undefined;
+
+      const events = await this.eventService.getUserEvents(req.user.userId, eventStatus);
 
       res.status(200).json({
         success: true,

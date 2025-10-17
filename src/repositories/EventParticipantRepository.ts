@@ -24,8 +24,24 @@ export class EventParticipantRepository {
     return EventParticipant.find({ eventId }).populate('userId').sort({ registrationDate: 1 });
   }
 
-  async findByUser(userId: string): Promise<IEventParticipant[]> {
-    return EventParticipant.find({ userId }).populate('eventId').sort({ registrationDate: -1 });
+  async findByUser(userId: string, eventStatus?: string): Promise<IEventParticipant[]> {
+    const query = EventParticipant.find({ userId });
+
+    // Populate eventId to access event status
+    const participants = await query.populate('eventId').sort({ registrationDate: -1 });
+
+    // Filter by event status if provided
+    if (eventStatus) {
+      return participants.filter(
+        (participant) =>
+          participant.eventId &&
+          typeof participant.eventId === 'object' &&
+          'status' in participant.eventId &&
+          participant.eventId.status === eventStatus
+      );
+    }
+
+    return participants;
   }
 
   async findAll(filters?: FilterQuery<IEventParticipant>): Promise<IEventParticipant[]> {
